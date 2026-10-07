@@ -11,7 +11,7 @@
 from .common import Extractor, Message
 from .. import text
 
-BASE_PATTERN = r"(?:https://)?(?:www\.|m\.)?vk\.com"
+BASE_PATTERN = r"(?:https://)?(?:www\.|m\.)?(?:vk\.com|vk\.ru)"
 
 
 class VkExtractor(Extractor):
@@ -148,10 +148,16 @@ class VkPhotosExtractor(VkExtractor):
 
     def metadata(self):
         if self.user_id:
+            # We already have the user ID from the URL pattern (e.g., id365929731)
+            # Fetch the profile page to get additional info (nick, info, name)
             user_id = self.user_id
             prefix = "public" if user_id[0] == "-" else "id"
             url = f"{self.root}/{prefix}{user_id.lstrip('-')}"
             data = self._extract_profile(url)
+            # Ensure the ID is set correctly (extraction from page may fail)
+            if not data["user"]["id"]:
+                data["user"]["id"] = user_id
+                data["user"]["group"] = False
         else:
             url = f"{self.root}/{self.user_name}"
             data = self._extract_profile(url)
@@ -163,13 +169,22 @@ class VkPhotosExtractor(VkExtractor):
         extr = text.extract_from(page)
 
         user = {
-            "id"  : extr('property="og:url" content="https://vk.com/id', '"'),
+            "id"  : extr('property="og:url" content="https://vk.com/id', '"') or
+                    extr('property="og:url" content="https://vk.ru/id', '"'),
             "nick": text.unescape(extr(
                 "<title>", " | VK</title>")),
             "info": text.unescape(extr(
                 ',"activity":"', '","')).replace("\\/", "/"),
             "name": extr('href="https://m.vk.com/', '"'),
         }
+
+        # If og:url didn't give us an ID, try to extract from apiPrefetchCache
+        # which contains: {"method":"utils.resolveScreenName","request":{"screen_name":"..."},"response":{"object_id":12345,"type":"user"}}
+        if not user["id"]:
+            import re
+            match = re.search(r'"object_id"\s*:\s*(\d+)', page)
+            if match:
+                user["id"] = match.group(1)
 
         if user["id"]:
             user["group"] = False

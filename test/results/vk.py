@@ -174,4 +174,40 @@ __tests__ = (
     },
 },
 
+# vk.ru domain tests (vk.ru is now the primary domain)
+{
+    "#url"     : "https://vk.ru/evrej13",
+    "#category": ("", "vk", "photos"),
+    "#class"   : vk.VkPhotosExtractor,
+},
+{
+    "#url"     : "https://vk.ru/id365929731",
+    "#category": ("", "vk", "photos"),
+    "#class"   : vk.VkPhotosExtractor,
+},
+{
+    "#url"     : "https://www.vk.ru/evrej13",
+    "#category": ("", "vk", "photos"),
+    "#class"   : vk.VkPhotosExtractor,
+},
+{
+    "#url"     : "https://m.vk.ru/evrej13",
+    "#category": ("", "vk", "photos"),
+    "#class"   : vk.VkPhotosExtractor,
+},
+{
+    "#url"     : "https://vk.ru/album-165740836_281339889",
+    "#category": ("", "vk", "album"),
+    "#class"   : vk.VkAlbumExtractor,
+},
+{
+    "#url"     : "https://vk.ru/tag304303884",
+    "#category": ("", "vk", "tagged"),
+    "#class"   : vk.VkTaggedExtractor,
+},
+{
+    "#url"     : "https://vk.ru/wall-213352498_2115",
+    "#class"   : vk.VkWallPostExtractor,
+},
+
 )
